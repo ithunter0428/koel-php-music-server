@@ -1,0 +1,41 @@
+<IfModule mod_headers.c>
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "POST, GET, PUT, OPTIONS, PATCH, DELETE"
+    Header always set Access-Control-Allow-Headers "Authorization,X-Accept-Charset,X-Accept,Content-Type"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews
+    </IfModule>
+
+    RewriteEngine On
+    RewriteBase /
+
+    # Redirect Trailing Slashes...
+    RewriteRule ^(.*)/$ /$1 [L,R=301]
+
+    # Whitelist only index.php, robots.txt, and those start with public/ or api/
+    RewriteRule ^(?!($|index\.php|robots\.txt|(public|api)/)) - [R=404,L]
+
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule .* index.php [L]
+
+    # https://github.com/tymondesigns/jwt-auth/wiki/Authentication
+    RewriteCond %{HTTP:Authorization} ^(.*)
+    RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+</IfModule>
+
+<IfModule mod_deflate.c>
+    # Disable deflation for media files.
+    SetEnvIfNoCase Request_URI "^/api/play/" no-gzip dont-vary
+</IfModule>
+
+<IfModule mod_expires.c>
+    # Cache the audio files for 1 year.
+    # It's up to the browser to respect this.
+    ExpiresActive On
+    ExpiresByType audio/(mpe?g3?|ogg|aac) "access plus 1 year"
+</IfModule>
